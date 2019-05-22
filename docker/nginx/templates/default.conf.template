@@ -1,0 +1,25 @@
+server {
+    listen ${NGINX_PORT};
+    root ${DOCUMENT_ROOT};
+
+    client_max_body_size 10M;
+
+    index index.php index.html index.htm;
+
+    location / {
+        try_files ${DOLLAR}uri ${DOLLAR}uri/ /index.php${DOLLAR}is_args${DOLLAR}args;
+    }
+
+    location ~ ^/(index|config)\.php(/|$) {
+        fastcgi_pass ${FASTCGI_HOST}:${FASTCGI_PORT};
+        fastcgi_split_path_info ^(.+\.php)(/.*)$;
+        include fastcgi_params;
+
+        fastcgi_param SCRIPT_FILENAME ${DOLLAR}realpath_root${DOLLAR}fastcgi_script_name;
+        fastcgi_param DOCUMENT_ROOT ${DOLLAR}realpath_root;
+    }
+
+    location ~ \.php$ {
+        return 404;
+    }
+}
